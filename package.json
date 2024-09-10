@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@influxdata/influxdb-client": "^1.35.0",
-    "@influxdata/influxdb-client-apis": "^1.35.0",
     "react": "^18",
     "react-dom": "^18",
     "next": "14.2.9"
