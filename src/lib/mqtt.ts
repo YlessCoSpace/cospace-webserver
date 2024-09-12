@@ -5,8 +5,11 @@ export class MqttAdapter {
   private client: MqttClient;
 
   constructor() {
-    const brokerUrl = "";
-    const options = {};
+    const brokerUrl = process.env.NEXT_PUBLIC_MQTT_BROKER_URL ?? "";
+    const options: IClientOptions = {
+      username: process.env.NEXT_PUBLIC_MQTT_USERNAME,
+      password: process.env.NEXT_PUBLIC_MQTT_PASSWORD,
+    };
 
     this.client = mqtt.connect(brokerUrl, options);
 
