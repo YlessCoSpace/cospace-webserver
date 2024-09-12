@@ -1,20 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { MqttAdapter } from "@/lib/mqtt";
 import { SeatMapService } from "@/services/seatMapService";
 
 export const useSeatMap = () => {
   const [seatData, setSeatData] = useState<string | null>(null);
+  const mqttAdapterRef = useRef<MqttAdapter | null>(null);
+  const seatMapServiceRef = useRef<SeatMapService | null>(null);
 
   useEffect(() => {
-    const mqttAdapter = new MqttAdapter();
-    const seatMapService = new SeatMapService(mqttAdapter);
+    mqttAdapterRef.current = new MqttAdapter();
+    seatMapServiceRef.current = new SeatMapService(mqttAdapterRef.current);
 
-    seatMapService.subscribe((message: string) => {
+    seatMapServiceRef.current.subscribe((message: string) => {
       setSeatData(message);
     });
 
     return () => {
-      mqttAdapter.disconnect();
+      mqttAdapterRef.current?.disconnect();
     };
   }, []);
 
