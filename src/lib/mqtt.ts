@@ -1,16 +1,16 @@
-// src/lib/mqttAdapter.ts
 import mqtt, { MqttClient, IClientOptions } from "mqtt";
 
 export class MqttAdapter {
   private client: MqttClient;
 
   constructor() {
-    const brokerUrl = process.env.NEXT_PUBLIC_MQTT_BROKER_URL ?? "";
+    const brokerUrl = process.env.MQTT_BROKER_URL ?? "";
     const options: IClientOptions = {
-      username: process.env.NEXT_PUBLIC_MQTT_USERNAME,
-      password: process.env.NEXT_PUBLIC_MQTT_PASSWORD,
+      username: process.env.MQTT_USERNAME,
+      password: process.env.MQTT_PASSWORD,
     };
 
+    console.log("Connecting to MQTT broker:", brokerUrl);
     this.client = mqtt.connect(brokerUrl, options);
 
     this.client.on("connect", () => {
