@@ -1,10 +1,17 @@
+import { InfluxDBAdapter } from "@/lib/influx";
 import { MqttAdapter } from "@/lib/mqtt";
+import { Point } from "@influxdata/influxdb-client";
 
 export class SeatMapService {
   private static instance: SeatMapService | null = null;
-  private data: string | null = null;
+  private data: TableMessage | null = null;
+  private mqttAdapter: MqttAdapter;
+  private influxDBAdapter: InfluxDBAdapter;
 
-  private constructor(private mqttAdapter: MqttAdapter) {}
+  private constructor(mqttAdapter: MqttAdapter, influxDBAdapter: InfluxDBAdapter) {
+    this.mqttAdapter = mqttAdapter;
+    this.influxDBAdapter = influxDBAdapter;
+  }
 
   private subscribe(callback: (message: string) => void) {
     try {
@@ -15,11 +22,7 @@ export class SeatMapService {
   }
 
   getData(): TableMessage | null {
-    try {
-      return JSON.parse(this.data!);
-    } catch (e) {
-      return null;
-    }
+    return this.data
   }
 
   send(data: TableMessage) {
@@ -28,11 +31,41 @@ export class SeatMapService {
 
   static getInstance(): SeatMapService {
     if (!this.instance) {
-      this.instance = new SeatMapService(new MqttAdapter());
-      this.instance.subscribe((msg) => {
-        this.instance!.data = msg;
-
-        // TODO: Save to database
+      this.instance = new SeatMapService(new MqttAdapter(), new InfluxDBAdapter());
+  
+      // Subscribe to the message handler
+      this.instance.subscribe(async (msg) => {
+        try {
+          // Parse the incoming message
+          const json: TableMessage = JSON.parse(msg);
+          this.instance!.data = json;
+        } catch (e) {
+          console.error("Error parsing JSON:", e);
+          return; // Stop further execution if JSON parsing fails
+        }
+  
+        try {
+          // Iterate through each TableNode in the TableMessage
+          for (const table of this.instance!.data.tables) {
+            const point = new Point("seatmap")
+              .tag('id', table.id.toString()) 
+              .floatField('x', table.x) 
+              .floatField('y', table.y) 
+              .intField('people', table.people) 
+              .booleanField('item', table.item) 
+              .intField('itemtime', table.time); 
+  
+            // Write each point to InfluxDB
+            this.instance!.influxDBAdapter.writeApi.writePoint(point);
+          }
+  
+          // Flush to ensure all points are written
+          this.instance!.influxDBAdapter.writeApi.flush();
+          console.log("Data written successfully to InfluxDB");
+  
+        } catch (error) {
+          console.error('Error writing to InfluxDB:', error);
+        }
       });
     }
     return this.instance;
