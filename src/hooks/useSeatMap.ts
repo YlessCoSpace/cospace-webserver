@@ -1,14 +1,18 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 
 export const useSeatMap = () => {
-  const [seatData, setSeatData] = useState<string | null>(null);
+  const [seatData, setSeatData] = useState<TableMessage | null>(null);
 
   useEffect(() => {
     const interval = setInterval(async () => {
       const response = await fetch("/api/seatmap");
-      const data = await response.json();
       if (response.ok) {
-        setSeatData(data.message);
+        const data = await response.json();
+        try {
+          setSeatData(data);
+        } catch (e) {
+          console.error("Failed to parse seatmap data:", e);
+        }
       }
     }, 15000);
 
