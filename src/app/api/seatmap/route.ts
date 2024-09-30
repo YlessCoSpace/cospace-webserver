@@ -12,14 +12,14 @@ export async function GET() {
 }
 
 // TEST PUBLISH - DEV ONLY
-// export async function POST(request: Request) {
-//   const service = SeatMapService.getInstance();
-//   const data = await request.json();
-//   try {
-//     const json = JSON.parse(data.message);
-//     service.send(json);
-//     return new Response("Message published", { status: 200 });
-//   } catch (e) {
-//     return new Response("Invalid", { status: 400 });
-//   }
-// }
+export async function POST(request: Request) {
+  const service = SeatMapService.getInstance();
+  const data = await request.json();
+  try {
+    const json = JSON.parse(data.message);
+    service.send(json);
+    return new Response("Message published", { status: 200 });
+  } catch (e) {
+    return new Response("Invalid", { status: 400 });
+  }
+}
