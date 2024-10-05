@@ -14,7 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="w-screen flex flex-col">
+      <body className="w-screen h-screen flex flex-col">
         <Navbar />
         {children}
       </body>
