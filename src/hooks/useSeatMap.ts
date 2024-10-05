@@ -1,16 +1,27 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 
 export const useSeatMap = () => {
-  const [seatData, setSeatData] = useState<string | null>(null);
+  const [seatData, setSeatData] = useState<TableMessage | null>(null);
 
   useEffect(() => {
-    const interval = setInterval(async () => {
-      const response = await fetch("/api/seatmap");
-      const data = await response.json();
-      if (response.ok) {
-        setSeatData(data.message);
+    const fetchSeatMapData = async () => {
+      try {
+        const response = await fetch("/api/seatmap");
+        if (response.ok) {
+          const data = await response.json();
+          setSeatData(data);
+        } else {
+          console.error("Failed to fetch seatmap data:", response.statusText);
+        }
+      } catch (error) {
+        console.error("Error fetching seatmap data:", error);
       }
-    }, 15000);
+    };
+
+    // Fetch data immediately after mount
+    fetchSeatMapData();
+
+    const interval = setInterval(fetchSeatMapData, 15000);
 
     return () => clearInterval(interval);
   }, []);

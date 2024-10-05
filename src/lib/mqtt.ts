@@ -19,6 +19,7 @@ export class MqttAdapter {
 
     this.client.on("error", (err) => {
       console.error("MQTT Connection Error:", err);
+      this.client.end();
     });
   }
 
