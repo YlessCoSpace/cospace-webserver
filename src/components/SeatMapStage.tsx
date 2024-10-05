@@ -1,6 +1,22 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Stage, Layer, Circle, Text, Rect } from "react-konva";
 
+const availableColor = "#82c493";
+const occupiedColor = "#d1d1d1";
+const reservedColor = "#fce3a4";
+
+const Label = ({ color, text }: { color: string, text: string }) => {
+  return (
+    <div className="flex flex-row gap-2 items-center text-[20px]">
+      <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: color }}>
+      {text === 'Reserved' && <span>👜</span>}
+      </div>
+      {text}
+    </div>
+  );
+};
+
+
 // Helper function to generate mini circles for people
 const getPeopleCircles = (t: TableNode, scale: number) => {
   const peopleCount = Math.min(t.people, 8); // Show maximum of 8 people
@@ -12,7 +28,7 @@ const getPeopleCircles = (t: TableNode, scale: number) => {
     const x = t.x * scale + radius * Math.cos(angle);
     const y = t.y * scale + radius * Math.sin(angle);
 
-    return <Circle key={index} x={x} y={y} radius={0.1 * scale} fill="#d1d1d1" />;
+    return <Circle key={index} x={x} y={y} radius={0.1 * scale} fill={occupiedColor} />;
   });
 };
 
@@ -45,42 +61,49 @@ export default function SeatMapStage({ tables, max_x, max_y }: { tables: TableNo
   const scale = Math.min(containerWidth / max_x, containerHeight / max_y);
 
   return (
-    <div id="stage-container" className="w-full h-full flex flex-row justify-center">
-      <Stage width={max_x * scale} height={max_y * scale}>
-        <Layer>
-          {/* Border rectangle */}
-          <Rect
-            x={0}
-            y={0}
-            width={max_x * scale}
-            height={max_y * scale}
-            stroke="black"
-            strokeWidth={4}
-            fill="transparent"
-          />
+    <div className="w-full h-full flex flex-col items-center">
+      <div id="stage-container" className="w-full h-full flex flex-row justify-center">
+        <Stage width={max_x * scale} height={max_y * scale}>
+          <Layer>
+            {/* Border rectangle */}
+            <Rect
+              x={0}
+              y={0}
+              width={max_x * scale}
+              height={max_y * scale}
+              stroke="black"
+              strokeWidth={4}
+              fill="transparent"
+            />
 
-          {tables.map((t) => (
-            <React.Fragment key={t.id}>
-              {/* Main table circle */}
-              <Circle
-                x={t.x * scale}
-                y={t.y * scale}
-                radius={0.5 * scale}
-                fill={t.people > 0 ? "#d1d1d1" : t.item ? "#d1d1d1" : "#82c493"}
-                strokeWidth={2}
-              />
+            {tables.map((t) => (
+              <React.Fragment key={t.id}>
+                {/* Main table circle */}
+                <Circle
+                  x={t.x * scale}
+                  y={t.y * scale}
+                  radius={0.5 * scale}
+                  fill={t.people > 0 ? occupiedColor : t.item ? reservedColor : availableColor}
+                  strokeWidth={2}
+                />
 
-              {/* Mini circles for people */}
-              {t.people > 0 && getPeopleCircles(t, scale)}
+                {/* Mini circles for people */}
+                {t.people > 0 && getPeopleCircles(t, scale)}
 
-              {/* Show bag icon if people <= 0 and item is true */}
-              {t.people <= 0 && t.item && (
-                <Text x={(t.x - 0.25) * scale} y={(t.y - 0.15) * scale} text="👜" fontSize={0.4 * scale} />
-              )}
-            </React.Fragment>
-          ))}
-        </Layer>
-      </Stage>
+                {/* Show bag icon if people <= 0 and item is true */}
+                {t.people <= 0 && t.item && (
+                  <Text x={(t.x - 0.25) * scale} y={(t.y - 0.15) * scale} text="👜" fontSize={0.4 * scale} />
+                )}
+              </React.Fragment>
+            ))}
+          </Layer>
+        </Stage>
+      </div>
+      <div className="h-16 flex flex-row justify-between" style={{ width: `${max_x * scale}px` }}>
+        <Label color={availableColor} text="Available" />
+        <Label color={occupiedColor} text="Occupied" />
+        <Label color={reservedColor} text="Reserved" />
+      </div>
     </div>
   );
 }
