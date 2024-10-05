@@ -5,18 +5,6 @@ const availableColor = "#82c493";
 const occupiedColor = "#d1d1d1";
 const reservedColor = "#fce3a4";
 
-const Label = ({ color, text }: { color: string, text: string }) => {
-  return (
-    <div className="flex flex-row gap-2 items-center text-[20px]">
-      <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: color }}>
-      {text === 'Reserved' && <span>👜</span>}
-      </div>
-      {text}
-    </div>
-  );
-};
-
-
 // Helper function to generate mini circles for people
 const getPeopleCircles = (t: TableNode, scale: number) => {
   const peopleCount = Math.min(t.people, 8); // Show maximum of 8 people
@@ -28,17 +16,33 @@ const getPeopleCircles = (t: TableNode, scale: number) => {
     const x = t.x * scale + radius * Math.cos(angle);
     const y = t.y * scale + radius * Math.sin(angle);
 
-    return <Circle key={index} x={x} y={y} radius={0.1 * scale} fill={occupiedColor} />;
+    return (
+      <Circle
+        key={index}
+        x={x}
+        y={y}
+        radius={0.1 * scale}
+        fill={occupiedColor}
+      />
+    );
   });
 };
 
-export default function SeatMapStage({ tables, max_x, max_y }: { tables: TableNode[], max_x: number, max_y: number }) {
+export default function SeatMapStage({
+  tables,
+  max_x,
+  max_y,
+}: {
+  tables: TableNode[];
+  max_x: number;
+  max_y: number;
+}) {
   const [containerWidth, setContainerWidth] = useState(0);
   const [containerHeight, setContainerHeight] = useState(0);
 
   // Debounced resize handler
   const handleResize = useCallback(() => {
-    const container = document.querySelector('#stage-container');
+    const container = document.querySelector("#stage-container");
     if (container) {
       setContainerWidth(container.offsetWidth);
       setContainerHeight(container.offsetHeight);
@@ -46,15 +50,15 @@ export default function SeatMapStage({ tables, max_x, max_y }: { tables: TableNo
   }, []);
 
   useEffect(() => {
-    const container = document.querySelector('#stage-container');
+    const container = document.querySelector("#stage-container");
     if (container) {
       handleResize();
     }
 
     // Handle window resize for responsiveness
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
-    return () => window.removeEventListener('resize', handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, [handleResize]);
 
   // Calculate scale dynamically whenever containerWidth or containerHeight changes
@@ -62,7 +66,10 @@ export default function SeatMapStage({ tables, max_x, max_y }: { tables: TableNo
 
   return (
     <div className="w-full h-full flex flex-col items-center">
-      <div id="stage-container" className="w-full h-full flex flex-row justify-center">
+      <div
+        id="stage-container"
+        className="w-full h-full flex flex-row justify-center"
+      >
         <Stage width={max_x * scale} height={max_y * scale}>
           <Layer>
             {/* Border rectangle */}
@@ -83,7 +90,13 @@ export default function SeatMapStage({ tables, max_x, max_y }: { tables: TableNo
                   x={t.x * scale}
                   y={t.y * scale}
                   radius={0.5 * scale}
-                  fill={t.people > 0 ? occupiedColor : t.item ? reservedColor : availableColor}
+                  fill={
+                    t.people > 0
+                      ? occupiedColor
+                      : t.item
+                      ? reservedColor
+                      : availableColor
+                  }
                   strokeWidth={2}
                 />
 
@@ -92,17 +105,17 @@ export default function SeatMapStage({ tables, max_x, max_y }: { tables: TableNo
 
                 {/* Show bag icon if people <= 0 and item is true */}
                 {t.people <= 0 && t.item && (
-                  <Text x={(t.x - 0.25) * scale} y={(t.y - 0.15) * scale} text="👜" fontSize={0.4 * scale} />
+                  <Text
+                    x={(t.x - 0.25) * scale}
+                    y={(t.y - 0.15) * scale}
+                    text="👜"
+                    fontSize={0.4 * scale}
+                  />
                 )}
               </React.Fragment>
             ))}
           </Layer>
         </Stage>
-      </div>
-      <div className="h-16 flex flex-row justify-between" style={{ width: `${max_x * scale}px` }}>
-        <Label color={availableColor} text="Available" />
-        <Label color={occupiedColor} text="Occupied" />
-        <Label color={reservedColor} text="Reserved" />
       </div>
     </div>
   );
