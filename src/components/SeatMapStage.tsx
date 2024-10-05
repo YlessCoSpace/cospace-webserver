@@ -42,7 +42,7 @@ export default function SeatMapStage({
 
   // Debounced resize handler
   const handleResize = useCallback(() => {
-    const container = document.querySelector("#stage-container");
+    const container = document.querySelector("#stage-container") as HTMLElement;
     if (container) {
       setContainerWidth(container.offsetWidth);
       setContainerHeight(container.offsetHeight);
