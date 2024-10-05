@@ -61,7 +61,7 @@ export class SeatMapService {
               .floatField("y", table.y)
               .intField("people", table.people)
               .booleanField("item", table.item)
-              .intField("itemtime", table.time);
+              .intField("startTime", table.startTime);
 
             // Write each point to InfluxDB
             this.instance!.influxDBAdapter.writeApi.writePoint(point);
